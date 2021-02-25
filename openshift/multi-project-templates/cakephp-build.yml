@@ -30,47 +30,6 @@ metadata:
   resourceVersion: "532091921"
   selfLink: /apis/template.openshift.io/v1/namespaces/openshift/templates/cakephp-mysql-persistent
   uid: 0a9cbf74-a242-42a5-bc3c-5b972f8bebbc
-objects:
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    name: ${NAME}
-    namespace: ${BUILD_NAMESPACE}
-    annotations:
-      description: Keeps track of changes in the application image
-- kind: BuildConfig
-  apiVersion: v1
-  metadata:
-    name: ${NAME}
-    namespace: ${BUILD_NAMESPACE}
-    annotations:
-      description: Defines how to build the application
-      template.alpha.openshift.io/wait-for-ready: "true"
-  spec:
-    output:
-      to:
-        kind: ImageStreamTag
-        name: ${NAME}:latest
-    postCommit:
-      script: ./vendor/bin/phpunit
-    source:
-      contextDir: ${CONTEXT_DIR}
-      git:
-        ref: ${SOURCE_REPOSITORY_REF}
-        uri: ${SOURCE_REPOSITORY_URL}
-      type: Git
-    strategy:
-      sourceStrategy:
-        env:
-        - name: COMPOSER_MIRROR
-          value: ${COMPOSER_MIRROR}
-        from:
-          kind: ImageStreamTag
-          name: php:${PHP_VERSION}
-          namespace: ${NAMESPACE}
-      type: Source
-    triggers:
-    - type: ConfigChange
 parameters:
 - name: BUILD_NAMESPACE
   displayName: Build Namespace
@@ -174,3 +133,44 @@ parameters:
     might be changed to caching_sha2_password once PHP client supports it.'
   displayName: MySQL authentication plugin
   value: mysql_native_password
+objects:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: ${NAME}
+    namespace: ${BUILD_NAMESPACE}
+    annotations:
+      description: Keeps track of changes in the application image
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: ${NAME}
+    namespace: ${BUILD_NAMESPACE}
+    annotations:
+      description: Defines how to build the application
+      template.alpha.openshift.io/wait-for-ready: "true"
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}:latest
+    postCommit:
+      script: ./vendor/bin/phpunit
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: COMPOSER_MIRROR
+          value: ${COMPOSER_MIRROR}
+        from:
+          kind: ImageStreamTag
+          name: php:${PHP_VERSION}
+          namespace: ${NAMESPACE}
+      type: Source
+    triggers:
+    - type: ConfigChange
